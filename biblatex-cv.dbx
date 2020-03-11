@@ -1,0 +1,374 @@
+\ProvidesFile{biblatex-cv.dbx}[2020/03/11 v0.01 biblatex-cv data model (DES)]
+
+% Add new data fields for both existing and new entry types
+\DeclareDatamodelFields[type=list, datatype=name]{advisor, committee, name, presenter} 
+\DeclareDatamodelFields[type=list, datatype=literal]{concentration, honors, minor} 
+\DeclareDatamodelFields[type=field, datatype=integer]{amount, numcites, numlectures, numstudents, presenterdeleted}
+\DeclareDatamodelFields[type=field, datatype=literal]{currency, degree, department, funder, gpa, major, presentationtype}
+\DeclareDatamodelFields[type=field, datatype=key]{role, status}
+\DeclareDatamodelFields[type=field, format=xsv, datatype=entrykey]{classes, degreelist, semesters}
+
+% Modify the existing data model inherited from blx-dm.def
+\DeclareDatamodelConstraints{
+	\constraint[type=data, datatype=pattern, pattern=\regexp{(
+		^forthcoming$|
+		^inpreparation$|
+		^inpress$|
+		^inrevision$|
+		^prepublished$|
+		^submitted$
+	)}]{
+		\constraintfield{pubstate}
+	}
+}
+
+% Define global changes to the data model
+\DeclareDatamodelConstraints{
+	\constraint[type=data, datatype=pattern,
+		pattern=\regexp{(
+			^contributed$|
+			^internal$|
+			^invited$|
+			^job$|
+			^keynote$
+		)}
+	]{
+		\constraintfield{presentationtype}
+	}
+}
+
+% ARTICLE
+\DeclareDatamodelEntryfields[article]{numcites}
+\DeclareDatamodelConstraints[article]{
+	\constraint[type=mandatory]{
+		\constraintfield{numcites}
+	}
+}
+
+% UNPUBLISHED
+\DeclareDatamodelEntryfields[unpublished]{journaltitle}
+
+% THESIS
+\DeclareDatamodelConstraints[thesis]{
+	\constraint[type=data, datatype=pattern,
+		pattern=\regexp{(
+			^doctoralthesis$|
+			^mastersthesis$|
+			^undergradthesis$
+		)}%
+	]{
+		\constraintfield{type}
+	}
+}
+
+% Define the data model for new entry types not defined in blx-dm.def
+
+% ABSTRACT
+% The data model for the abstract entrytype is a modified version of the article entrytype data model. We start by copying the article data model from blx-dm.def
+\DeclareDatamodelEntrytypes{abstract}
+\DeclareDatamodelEntryfields[abstract]{
+  addendum,
+  annotator,
+  author,
+  commentator,
+  doi,
+  editor,
+  editora,
+  editorb,
+  editorc,
+  editortype,
+  editoratype,
+  editorbtype,
+  editorctype,
+  eid,
+  eprint,
+  eprintclass,
+  eprinttype,
+  issn,
+  issue,
+  issuetitle,
+  issuesubtitle,
+  journalsubtitle,
+  journaltitle,
+  language,
+  note,
+  number,
+  origlanguage,
+  pages,
+  pubstate,
+  series,
+  subtitle,
+  title,
+  titleaddon,
+  translator,
+  version,
+  volume}
+\DeclareDatamodelConstraints[abstract]{
+	\constraint[type=mandatory]{
+		\constraintfieldsxor{
+			\constraintfield{date}
+			\constraintfield{year}
+		}
+		\constraintfield{author}
+		\constraintfield{journaltitle}
+		\constraintfield{title}
+	}
+}
+
+\DeclareDatamodelEntryfields[abstract]{
+	entrysubtype,
+	presentationtype,
+	presenter,
+	presenterdeleted,
+}
+\DeclareDatamodelConstraints[abstract]{
+	\constraint[type=mandatory]{
+		\constraintfield{entrysubtype}
+		\constraintfield{presentationtype}
+		\constraintfieldsor{
+			\constraintfield{presenter}
+			\constraintfield{presenterdeleted}
+		}
+	}
+	\constraint[type=data, datatype=pattern,
+		pattern=\regexp{(^poster$|^talk$|)}
+	]{
+		\constraintfield{entrysubtype}
+	}
+}
+
+% COMMITTEE
+\DeclareDatamodelEntrytypes{committee}
+\DeclareDatamodelEntryfields[committee]{
+	date,day,endday,endmonth,endyear,month,year,
+	entrysubtype,
+	title,
+	institution,
+	location,
+	department,
+	role,
+	semesters,
+}
+\DeclareDatamodelConstraints[committee]{
+	\constraint[type=mandatory]{
+		\constraintfieldsor{
+			\constraintfield{date}
+			\constraintfield{semesters}
+		}
+		\constraintfield{entrysubtype}
+		\constraintfield{title}
+		\constraintfield{institution}
+	}
+	\constraint[type=data, datatype=pattern, pattern=\regexp{(%
+		^departmental$|
+		^external$|
+		^institutional$
+	)}]{
+		\constraintfield{entrysubtype}
+	}
+}
+
+% EDUCATION
+\DeclareDatamodelEntrytypes{school}
+\DeclareDatamodelEntryfields[school]{
+	date,day,endday,endmonth,endyear,month,year,
+	institution,
+	location,
+	department,
+	degreelist,
+	gpa,
+	honors,
+}
+\DeclareDatamodelConstraints[school]{
+	\constraint[type=mandatory]{
+		\constraintfieldsxor{
+			\constraintfield{date}
+			\constraintfield{year}
+		}
+		\constraintfield{institution}
+		\constraintfield{location}
+	}
+}
+
+\DeclareDatamodelEntrytypes{degree}
+\DeclareDatamodelEntryfields[degree]{
+	date,day,endday,endmonth,endyear,month,year,
+	institution,
+	location,
+	department,
+	degree,
+	gpa,
+	honors,
+	major,
+	minor,
+	concentration,
+	advisor,
+	committee,
+	title,
+}
+\DeclareDatamodelConstraints[degree]{
+	\constraint[type=mandatory]{
+		\constraintfieldsxor{
+			\constraintfield{date}
+			\constraintfield{year}
+		}
+		\constraintfield{institution}
+		\constraintfield{location}
+	}
+}
+
+% FUNDING
+\DeclareDatamodelEntrytypes{funding}
+\DeclareDatamodelEntryfields[funding]{
+	date,day,endday,endmonth,endyear,month,year,
+	entrysubtype,
+	status,
+	author,
+	funder,
+	title,
+	role,
+	amount,
+	currency,
+	number,
+	type,
+}
+\DeclareDatamodelConstraints[funding]{
+	\constraint[type=mandatory]{
+		\constraintfieldsxor{
+			\constraintfield{date}
+			\constraintfield{year}
+		}
+		\constraintfield{entrysubtype}
+		\constraintfield{status}
+		\constraintfield{author}
+		\constraintfield{funder}
+	}
+	\constraint[type=data, datatype=pattern, pattern=\regexp{(^individual$|^institutional$)}]{
+		\constraintfield{entrysubtype}
+	}
+	\constraint[
+		type=data, datatype=pattern, 
+		pattern=\regexp{(^completed$|^ongoing$|^pending$|^submitted$|^unsuccessful$)}
+	]{
+		\constraintfield{status}
+	}
+}
+
+% PRESENTATION
+\DeclareDatamodelEntrytypes{presentation}
+\DeclareDatamodelEntryfields[presentation]{
+	date,day,endday,endmonth,endyear,month,year,
+	entrysubtype,
+	author,
+	presentationtype,
+	presenter,
+	presenterdeleted,
+	title,
+	institution,
+	location,
+	department,
+}
+\DeclareDatamodelConstraints[presentation]{
+	\constraint[type=mandatory]{
+		\constraintfieldsxor{
+			\constraintfield{date}
+			\constraintfield{year}
+		}
+		\constraintfield{entrysubtype}
+		\constraintfield{author}
+		\constraintfield{presentationtype}
+		\constraintfieldsor{
+			\constraintfield{presenter}
+			\constraintfield{presenterdeleted}
+		}
+		\constraintfield{title}
+		\constraintfield{institution}
+		\constraintfield{location}
+	}
+	\constraint[type=data, datatype=pattern,
+		pattern=\regexp{(^poster$|^talk$|)}
+	]{
+		\constraintfield{entrysubtype}
+	}
+}
+
+% STUDENT
+\DeclareDatamodelEntrytypes{student}
+\DeclareDatamodelEntryfields[student]{
+	date,day,endday,endmonth,endyear,month,year,
+	entrysubtype,
+	role,
+	name,
+	institution,
+	location,
+	department,
+}
+\DeclareDatamodelConstraints[student]{
+	\constraint[type=mandatory]{
+		\constraintfieldsxor{
+			\constraintfield{date}
+			\constraintfield{year}
+		}
+		\constraintfield{entrysubtype}
+		\constraintfield{role}
+		\constraintfield{name}
+		\constraintfield{institution}
+		\constraintfield{location}
+	}
+	\constraint[type=data, datatype=pattern, pattern=\regexp{(^masters$|^phd$|^postdoc$|^undergraduate$)}]{
+		\constraintfield{entrysubtype}
+	}
+	\constraint[type=data, datatype=pattern, pattern=\regexp{(^externalexaminer$|^internalexaminer$|^secondsupervisor$|^supervisor$)}]{
+		\constraintfield{role}
+	}
+}
+
+% TEACHING
+\DeclareDatamodelEntrytypes{teaching}
+\DeclareDatamodelEntryfields[teaching]{
+	date,day,endday,endmonth,endyear,month,year,
+	entrysubtype,
+	title,
+	department,
+	institution,
+	location,
+	number,
+	numlectures,
+	numstudents, 
+	role,
+	classes,
+}
+\DeclareDatamodelConstraints[teaching]{
+	\constraint[type=mandatory]{
+		\constraintfieldsxor{
+			\constraintfield{date}
+			\constraintfield{classes}
+		}
+		\constraintfield{entrysubtype}
+		\constraintfield{title}
+		\constraintfield{department}
+		\constraintfield{institution}
+		\constraintfield{location}
+	}
+	\constraint[type=data, datatype=pattern, pattern=\regexp{(^graduate$|^undergraduate$)}]{
+		\constraintfield{entrysubtype}
+	}
+}
+
+% ADDITIONAL FIELDS TO ADD TO SUPPORTED ENTRY TYPES
+% Education: description, coursework
+% Funding: co-investigators, description, publications
+% Student: title, funding, current position, description, publications, something to indicate students that dropped out
+% Teaching: description, textbook, objectives, rating
+
+% ADDITIONAL ENTRY TYPES NOT YET SUPPORTED:
+% Panels Organized -- Maybe this should be a subtype of \bibtype{committee}
+% Panel Discussant -- Maybe this should be a subtype of \bibtype{committee}
+% Awards/Honors
+% Positions -- permanent, visiting, adjunct, affiliated, ...
+% Research Experience
+% Media Coverage
+% Related skills
+% Non-Academic Work
+% Professional Memberships/Affiliations
+% References

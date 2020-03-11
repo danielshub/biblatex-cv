@@ -1,0 +1,726 @@
+% Copyright (c) 2020- Daniel E. Shub.
+%
+% Permission is granted to copy, distribute and/or modify this software under the terms of the LaTeX Project Public License (LPPL), version 1.3c.
+%
+% This software is provided 'as is', without warranty of any kind, either expressed or implied, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose.
+
+\NeedsTeXFormat{LaTeX2e}[2005/12/01]
+\ProvidesPackage{biblatex-cv}[2020/03/11 v0.01 biblatex-cv bibliography style (DES)]
+
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{biblatex}}
+\ProcessOptions\relax
+
+\PassOptionsToPackage{
+	labelnumber = true, defernumbers = true, backend = biber, 
+	style = biblatex-cv, sorting = ydnt, maxnames = 999
+}{biblatex}
+\RequirePackage{biblatex}
+
+\RequirePackage{expl3, xparse}
+\RequirePackage{totcount}
+\RequirePackage{xpatch}
+
+% Document layout
+\setlength{\biblabelsep}{0.5em}
+\defbibheading{bibliography}{}
+
+\toggletrue{cv@blx:pubstate}
+
+\togglefalse{cv@blx:funding:hidePI}
+\toggletrue{cv@blx:funding:role}
+\toggletrue{cv@blx:funding:status}
+\toggletrue{cv@blx:presentation:subtype}
+\toggletrue{cv@blx:presentation:type}
+\toggletrue{cv@blx:student:institution}
+\toggletrue{cv@blx:student:location}
+\toggletrue{cv@blx:student:department}
+\toggletrue{cv@blx:student:type}
+\toggletrue{cv@blx:school:years}
+\toggletrue{cv@blx:teaching:institution}
+\toggletrue{cv@blx:teaching:location}
+\toggletrue{cv@blx:teaching:department}
+
+% Bibfilters
+
+% ABSTRACT
+\defbibcheck{Abstract}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+}
+\defbibcheck{Abstract:Contributed}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{contributed}{}{\skipentry}%
+}
+\defbibcheck{Abstract:Invited}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{invited}{}{\skipentry}%
+}
+\defbibcheck{Abstract:Keynote}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{keynote}{}{\skipentry}
+}
+\defbibcheck{Abstract:NotInternalOrJob}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{\skipentry}{%
+		\iffieldequalstr{presentationtype}{job}{\skipentry}{}%
+	}%
+}
+
+\defbibcheck{Abstract:PosterContributed}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{contributed}{}{\skipentry}%
+}
+\defbibcheck{Abstract:PosterInvited}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{invited}{}{\skipentry}%
+}
+\defbibcheck{Abstract:PosterKeynote}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{keynote}{}{\skipentry}
+}
+\defbibcheck{Abstract:PosterNotInternalOrJob}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{\skipentry}{%
+		\iffieldequalstr{presentationtype}{job}{\skipentry}{}%
+	}%
+}
+
+\defbibcheck{Abstract:TalkContributed}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{contributed}{}{\skipentry}%
+}
+\defbibcheck{Abstract:TalkInvited}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{invited}{}{\skipentry}%
+}
+\defbibcheck{Abstract:TalkKeynote}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{keynote}{}{\skipentry}
+}
+\defbibcheck{Abstract:TalkNotInternalOrJob}{%
+	\ifentrytype{abstract}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{\skipentry}{%
+		\iffieldequalstr{presentationtype}{job}{\skipentry}{}%
+	}%
+}
+
+% COMMITTEE
+\defbibcheck{Committee}{%
+	\ifentrytype{committee}{}{\skipentry}%
+}
+\defbibcheck{Committee:External}{%
+	\ifentrytype{committee}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{external}{}{\skipentry}%
+}
+\defbibcheck{Committee:Departmental}{%
+	\ifentrytype{committee}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{departmental}{}{\skipentry}%
+}
+\defbibcheck{Committee:Institutional}{%
+	\ifentrytype{committee}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+}
+\defbibcheck{Committee:NotExternal}{%
+	\ifentrytype{committee}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{external}{\skipentry}{}%
+}
+
+% EDUCATION
+\defbibcheck{Education}{%
+	\ifentrytype{school}{}{%
+		\ifentrytype{degree}{}{\skipentry}%
+	}%
+}
+
+% FUNDING
+\defbibcheck{Funding}{%
+	\ifentrytype{funding}{}{\skipentry}%
+}
+\defbibcheck{Funding:Completed}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{status}{completed}{}{\skipentry}%
+}
+\defbibcheck{Funding:Ongoing}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{status}{ongoing}{}{\skipentry}%
+}
+\defbibcheck{Funding:Pending}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{status}{pending}{}{\skipentry}%
+}
+\defbibcheck{Funding:Submitted}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{status}{submitted}{}{\skipentry}%
+}
+\defbibcheck{Funding:Unsuccessful}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{status}{unsuccessful}{}{\skipentry}%
+}
+\defbibcheck{Funding:CurrentAndPending}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{status}{ongoing}{}{%
+		\iffieldequalstr{status}{pending}{}{%
+			\iffieldequalstr{status}{submitted}{}{\skipentry}%
+		}%
+	}%
+}
+\defbibcheck{Funding:NotUnsuccessful}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{status}{unsuccessful}{\skipentry}{}%
+}
+
+\defbibcheck{Funding:Individual}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+}
+\defbibcheck{Funding:IndividualCompleted}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+	\iffieldequalstr{status}{completed}{}{\skipentry}%
+}
+\defbibcheck{Funding:IndividualOngoing}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+	\iffieldequalstr{status}{ongoing}{}{\skipentry}%
+}
+\defbibcheck{Funding:IndividualPending}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+	\iffieldequalstr{status}{pending}{}{\skipentry}%
+}
+\defbibcheck{Funding:IndividualSubmitted}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+	\iffieldequalstr{status}{submitted}{}{\skipentry}%
+}
+\defbibcheck{Funding:IndividualUnsuccessful}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+	\iffieldequalstr{status}{unsuccessful}{}{\skipentry}%
+}
+\defbibcheck{Funding:IndividualCurrentAndPending}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+	\iffieldequalstr{status}{ongoing}{}{%
+		\iffieldequalstr{status}{pending}{}{%
+			\iffieldequalstr{status}{submitted}{}{\skipentry}%
+		}%
+	}%
+}
+\defbibcheck{Funding:IndividualNotUnsuccessful}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{individual}{}{\skipentry}%
+	\iffieldequalstr{status}{unsuccessful}{\skipentry}{}%
+}
+
+\defbibcheck{Funding:Institutional}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+}
+\defbibcheck{Funding:InstitutionalCompleted}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+	\iffieldequalstr{status}{completed}{}{\skipentry}%
+}
+\defbibcheck{Funding:InstitutionalOngoing}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+	\iffieldequalstr{status}{ongoing}{}{\skipentry}%
+}
+\defbibcheck{Funding:InstitutionalPending}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+	\iffieldequalstr{status}{pending}{}{\skipentry}%
+}
+\defbibcheck{Funding:InstitutionalSubmitted}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+	\iffieldequalstr{status}{submitted}{}{\skipentry}%
+}
+\defbibcheck{Funding:InstitutionalUnsuccessful}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+	\iffieldequalstr{status}{unsuccessful}{}{\skipentry}%
+}
+\defbibcheck{Funding:InstitutionalCurrentAndPending}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+	\iffieldequalstr{status}{ongoing}{}{%
+		\iffieldequalstr{status}{pending}{}{%
+			\iffieldequalstr{status}{submitted}{}{\skipentry}%
+		}%
+	}%
+}
+\defbibcheck{Funding:InstitutionalNotUnsuccessful}{%
+	\ifentrytype{funding}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{institutional}{}{\skipentry}%
+	\iffieldequalstr{status}{unsuccessful}{\skipentry}{}%
+}
+
+% PRESENTATION
+\defbibcheck{Presentation}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+}
+\defbibcheck{Presentation:Contributed}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{contributed}{}{\skipentry}%
+}
+\defbibcheck{Presentation:Internal}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{}{\skipentry}%
+}
+\defbibcheck{Presentation:Invited}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{invited}{}{\skipentry}%
+}
+\defbibcheck{Presentation:Job}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{job}{}{\skipentry}%
+}
+\defbibcheck{Presentation:Keynote}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{keynote}{}{\skipentry}
+}
+\defbibcheck{Presentation:NotInternalOrJob}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{\skipentry}{%
+		\iffieldequalstr{presentationtype}{job}{\skipentry}{}%
+	}%
+}
+
+\defbibcheck{Presentation:Poster}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+}
+\defbibcheck{Presentation:PosterContributed}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{contributed}{}{\skipentry}%
+}
+\defbibcheck{Presentation:PosterInternal}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{}{\skipentry}%
+}
+\defbibcheck{Presentation:PosterInvited}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{invited}{}{\skipentry}%
+}
+\defbibcheck{Presentation:PosterJob}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{job}{}{\skipentry}%
+}
+\defbibcheck{Presentation:PosterKeynote}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{keynote}{}{\skipentry}
+}
+\defbibcheck{Presentation:PosterNotInternalOrJob}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{poster}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{\skipentry}{%
+		\iffieldequalstr{presentationtype}{job}{\skipentry}{}%
+	}%
+}
+
+\defbibcheck{Presentation:Talk}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+}
+\defbibcheck{Presentation:TalkContributed}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{contributed}{}{\skipentry}%
+}
+\defbibcheck{Presentation:TalkInternal}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{}{\skipentry}%
+}
+\defbibcheck{Presentation:TalkInvited}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{invited}{}{\skipentry}%
+}
+\defbibcheck{Presentation:TalkJob}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{job}{}{\skipentry}%
+}
+\defbibcheck{Presentation:TalkKeynote}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{keynote}{}{\skipentry}
+}
+\defbibcheck{Presentation:TalkNotInternalOrJob}{%
+	\ifentrytype{presentation}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{talk}{}{\skipentry}%
+	\iffieldequalstr{presentationtype}{internal}{\skipentry}{%
+		\iffieldequalstr{presentationtype}{job}{\skipentry}{}%
+	}%
+}
+
+% STUDENT
+\defbibcheck{Student}{%
+	\ifentrytype{student}{}{\skipentry}%
+}
+\defbibcheck{Student:Masters}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{masters}{}{\skipentry}%
+}
+\defbibcheck{Student:Phd}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{phd}{}{\skipentry}%
+}
+\defbibcheck{Student:Postdoc}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{postdoc}{}{\skipentry}%
+}
+\defbibcheck{Student:Undergraduate}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
+}
+\defbibcheck{Student:NotUndergraduate}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{\skipentry}{}%
+}
+\defbibcheck{Student:Externalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{role}{externalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:Internalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:Secondsupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{role}{secondsupervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:Supervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{role}{supervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:NotExaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{\skipentry}{}%
+	\iffieldequalstr{role}{externalexaminer}{\skipentry}{}%
+}
+\defbibcheck{Student:MastersExternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{masters}{}{\skipentry}%
+	\iffieldequalstr{role}{externalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:MastersInternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{masters}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:MastersSecondsupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{masters}{}{\skipentry}%
+	\iffieldequalstr{role}{secondsupervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:MastersSupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{masters}{}{\skipentry}%
+	\iffieldequalstr{role}{supervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:MastersNotExaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{masters}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{\skipentry}{}%
+	\iffieldequalstr{role}{externalexaminer}{\skipentry}{}%
+}
+\defbibcheck{Student:PhdExternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{phd}{}{\skipentry}%
+	\iffieldequalstr{role}{externalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:PhdInternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{phd}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:PhdSecondsupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{phd}{}{\skipentry}%
+	\iffieldequalstr{role}{secondsupervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:PhdSupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{phd}{}{\skipentry}%
+	\iffieldequalstr{role}{supervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:PhdNotExaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{phd}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{\skipentry}{}%
+	\iffieldequalstr{role}{externalexaminer}{\skipentry}{}%
+}
+\defbibcheck{Student:PostdocExternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{postdoc}{}{\skipentry}%
+	\iffieldequalstr{role}{externalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:PostdocInternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{postdoc}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:PostdocSecondsupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{postdoc}{}{\skipentry}%
+	\iffieldequalstr{role}{secondsupervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:PostdocSupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{postdoc}{}{\skipentry}%
+	\iffieldequalstr{role}{supervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:PostdocNotExaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{postdoc}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{\skipentry}{}%
+	\iffieldequalstr{role}{externalexaminer}{\skipentry}{}%
+}
+\defbibcheck{Student:UndergraduateExternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
+	\iffieldequalstr{role}{externalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:UndergraduateInternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:UndergraduateSecondsupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
+	\iffieldequalstr{role}{secondsupervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:UndergraduateSupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
+	\iffieldequalstr{role}{supervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:UndergraduateNotExaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
+	\iffieldequalstr{role}{internalexaminer}{\skipentry}{}%
+	\iffieldequalstr{role}{externalexaminer}{\skipentry}{}%
+}
+\defbibcheck{Student:NotUndergraduateExternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{\skipentry}{}%
+	\iffieldequalstr{role}{externalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:NotUndergraduateInternalexaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{\skipentry}{}%
+	\iffieldequalstr{role}{internalexaminer}{}{\skipentry}%
+}
+\defbibcheck{Student:NotUndergraduateSecondsupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{\skipentry}{}%
+	\iffieldequalstr{role}{secondsupervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:NotUndergraduateSupervisor}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{\skipentry}{}%
+	\iffieldequalstr{role}{supervisor}{}{\skipentry}%
+}
+\defbibcheck{Student:NotUndergraduateNotExaminer}{%
+	\ifentrytype{student}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{\skipentry}{}%
+	\iffieldequalstr{role}{internalexaminer}{\skipentry}{}%
+	\iffieldequalstr{role}{externalexaminer}{\skipentry}{}%
+}
+
+% TEACHING
+\defbibcheck{Teaching}{%
+	\ifentrytype{teaching}{}{\skipentry}%
+}
+\defbibcheck{Teaching:Graduate}{%
+	\ifentrytype{teaching}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{graduate}{}{\skipentry}%
+}
+\defbibcheck{Teaching:Undergraduate}{%
+	\ifentrytype{teaching}{}{\skipentry}%
+	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
+}
+
+% Emphasize a name throughout the CV. We need to patch the name formats and not the underlying bib macros since the bib macros might only get initials and not the full name. Ideally this would work with multiple names.
+\newcommand{\cv@blx@highlightname@format}{\textbf}
+\newcommand{\cv@blx@highlightname}{}
+\newcommand{\cv@blx@highlightnamehash}{XXXXXXXXXX}
+\newcommand{\highlightname}[5]{%
+	\renewcommand{\cv@blx@highlightname}{#1|#2|#3|#4}%
+	\renewcommand{\cv@blx@highlightnamehash}{#5}%
+}
+
+\ExplSyntaxOn
+	\NewDocumentCommand{\cv@blx@deleteName}{mm}{% Hash, Authors
+		\tl_set:Nn\l_tmpa_tl{#2}%
+		\str_if_in:nnTF{#2}{hash=#1}{%
+			\numdef\NewCount{\NewCount-1}%
+			\regex_replace_all:nnN{\cB\{\cB\{.*?hash=#1.*?\cE\}\cE\}\cE\}}{}\l_tmpa_tl%
+			\edef\NewValue{\l_tmpa_tl}%
+			\blx@bbl@addfield{presenterdeleted}{1}%
+		}{}%
+	}
+\ExplSyntaxOff
+
+\DeclareNameInputHandler{presenter}{%
+	\expandafter\expandafter\expandafter\cv@blx@deleteName%
+	\expandafter\expandafter\expandafter{%
+		\expandafter\cv@blx@highlightnamehash\expandafter%
+	}\expandafter{%
+		\NewValue%
+	}%
+}
+
+\newcommand{\cv@blx@highlightname@patch}{%
+	\begingroup% Needs to be ended by an \xapptonameformat
+		\def\bibnamedelima{ }%
+		\long\edef\@tempa{\namepartfamily|\namepartgiven|\namepartprefix|\namepartsuffix}%
+		\ifdefequal{\cv@blx@highlightname}{\@tempa}{%
+			\let\mkbibnamegiven=\cv@blx@highlightname@format%
+			\let\mkbibnamefamily=\cv@blx@highlightname@format%
+			\let\mkbibnameprefix=\cv@blx@highlightname@format%
+			\let\mkbibnamesuffix=\cv@blx@highlightname@format%
+		}{}%
+}
+\xpretonameformat{given-family}{\cv@blx@highlightname@patch}{}{}
+\xapptonameformat{given-family}{\endgroup}{}{}
+\xpretonameformat{family-given}{\cv@blx@highlightname@patch}{}{}
+\xapptonameformat{family-given}{\endgroup}{}{}
+\xpretonameformat{family-given/given-family}{\cv@blx@highlightname@patch}{}{}
+\xapptonameformat{family-given/given-family}{\endgroup}{}{}
+\xpretonameformat{initsonly}{\cv@blx@highlightname@patch}{}{}
+\xapptonameformat{initsonly}{\endgroup}{}{}
+
+% Some sections of a CV should have numbered items and some should not. We need to define unnumbered and numbered (with descending labels) bibliography environments. In order for this to work, we need to create a new totcounter every time a new bibliography is started. I think this breaks if there is more than one refsection in the CV, but I am not sure why there would be more than one refsection in a CV.
+\newcounter{cv@blx@bib}
+\newtotcounter{cv@blx@ref@0}
+\xpatchcmd{\printbibliography}{\begingroup}{%
+		\stepcounter{cv@blx@bib}%
+		\edef\@tempa{cv@blx@ref@\arabic{cv@blx@bib}}%
+		\expandafter\newtotcounter\expandafter{\@tempa}%
+	\begingroup
+}{}{}
+
+\newrobustcmd{\mkbibdown}[1]{%
+	\stepcounter{cv@blx@ref@\arabic{cv@blx@bib}}%
+	\begingroup%
+		\edef\@tempa{cv@blx@ref@\arabic{cv@blx@bib}}%
+		\number\numexpr%
+			\expandafter\totvalue\expandafter{\@tempa}+1-#1%
+		\relax%
+	\endgroup%
+}
+
+\DeclareFieldFormat{labelnumber}{\mkbibdown{#1}}
+\DeclareFieldFormat{labelnumberwidth}{\mkbibbrackets{#1}}
+
+\newcommand{\cv@blx@list}{%
+	\setlength{\labelwidth}{\labelnumberwidth}%
+	\setlength{\leftmargin}{\labelwidth}%
+	\setlength{\labelsep}{\biblabelsep}%
+	\addtolength{\leftmargin}{\labelsep}%
+	\setlength{\itemsep}{\bibitemsep}%
+	\setlength{\parsep}{\bibparsep}%
+	\addtolength{\leftmargin}{\bibhang}%
+	\setlength{\itemindent}{-\bibhang}%
+}
+
+\newcommand{\cv@blx@sublist}{%
+	\setlength{\labelwidth}{\labelnumberwidth}%
+	\setlength{\leftmargin}{\labelwidth}%
+	\setlength{\labelsep}{\biblabelsep}%
+	\addtolength{\leftmargin}{\labelsep}%
+	\setlength{\itemsep}{\bibitemsep}%
+	\setlength{\parsep}{\bibparsep}%
+	\addtolength{\leftmargin}{2\bibhang}%
+	\setlength{\itemindent}{-\bibhang}%
+}
+
+\defbibenvironment{numbered}{%
+	\list{%
+		\printtext[labelnumberwidth]{%
+			\printfield{prefixnumber}%
+			\printfield{labelnumber}%
+		}%
+	}{\cv@blx@list}%
+	\renewcommand*{\makelabel}[1]{\hss##1}%
+}{\endlist}{\item}
+
+\defbibenvironment{unnumbered}{%
+	\list{}{\cv@blx@list}%
+	\renewcommand*{\makelabel}[1]{\hss##1}%
+}{\endlist}{\item}
+
+% Data inheritances need to be defined for the related types
+\DeclareDataInheritance{committee}{committee}{
+	\inherit{entrysubtype}{entrysubtype}
+	\noinherit{semesters}
+}
+
+\DeclareDataInheritance{school}{degree}{
+	\noinherit{degreelist}
+	\noinherit{gpa}
+}
+
+% Deal with the verbose style options
+\iftoggle{cv@blx:verbose:committee}{
+	\DeclareStyleSourcemap{
+		\maps[datatype = bibtex]{
+			\map[overwrite]{
+				\pertype{committee}
+				\step[fieldsource = semesters, fieldset = options,  fieldvalue = {skipbib = true}]
+			}
+		}
+	}
+}{
+	\DeclareStyleSourcemap{
+		\maps[datatype = bibtex]{
+			\map[overwrite]{
+				\pertype{committee}
+				\step[fieldsource = crossref,  fieldset = options, fieldvalue = {skipbib = true}]
+			}
+		}
+	}
+}
+
+\DeclareStyleSourcemap{
+	\maps[datatype = bibtex]{
+		\map[overwrite]{
+			\pertype{teaching}
+			\step[fieldsource = crossref,  fieldset = options, fieldvalue = {skipbib = true}]
+		}
+	}
+	\maps[datatype = bibtex]{
+		\map[overwrite]{
+			\pertype{degree}
+			\step[fieldsource = crossref,  fieldset = options, fieldvalue = {skipbib = true}]
+		}
+	}
+}
+
+\iftoggle{cv@blx:verbose:education}{
+	\toggletrue{cv@blx:education:advisor}
+	\toggletrue{cv@blx:education:committee}
+	\toggletrue{cv@blx:education:gpa}
+	\toggletrue{cv@blx:education:honors}
+	\toggletrue{cv@blx:education:major}
+	\toggletrue{cv@blx:education:minor}
+	\toggletrue{cv@blx:education:title}
+}{}

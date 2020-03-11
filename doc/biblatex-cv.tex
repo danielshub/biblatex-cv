@@ -1,0 +1,416 @@
+% The header to this document is based on the biblatex.tex document. The ordering and style of the documentation also is based on biblatex.tex.
+\documentclass{ltxdockit}[2011/03/25]
+\usepackage{btxdockit}
+\usepackage{fontspec}
+\usepackage{hyperref}
+\usepackage{zref-xr}
+
+\setmonofont{Courier New}
+\setmainfont[Ligatures=TeX]{Linux Libertine O}
+\setsansfont[Ligatures=TeX]{Linux Biolinum O}
+\usepackage[american]{babel}
+\usepackage[strict]{csquotes}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{shortvrb}
+\usepackage{pifont}
+\usepackage{microtype}
+\usepackage{typearea}
+\usepackage{mdframed}
+\areaset[current]{370pt}{700pt}
+\lstset{
+    basicstyle=\ttfamily,
+    keepspaces=true,
+    upquote=true,
+    frame=single,
+    breaklines=true,
+    postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}}
+}
+\KOMAoptions{numbers=noenddot}
+\addtokomafont{title}{\sffamily}
+\addtokomafont{disposition}{\spotcolor}
+\addtokomafont{descriptionlabel}{\spotcolor}
+\setkomafont{caption}{\bfseries\sffamily\spotcolor}
+\setkomafont{captionlabel}{\bfseries\sffamily\spotcolor}
+\pretocmd{\cmd}{\sloppy}{}{}
+\pretocmd{\bibfield}{\sloppy}{}{}
+\pretocmd{\bibtype}{\sloppy}{}{}
+\makeatletter
+\RedeclareSectionCommand[%
+  beforeskip=-3.25ex\@plus -1ex \@minus -.2ex,%
+  afterskip=1.5ex \@plus .2ex,%
+]{paragraph}
+\RedeclareSectionCommand[%
+  beforeskip=-3.25ex\@plus -1ex \@minus -.2ex,%
+  indent=\z@,%
+]{subparagraph}
+\makeatother
+
+\MakeAutoQuote{«}{»}
+\MakeAutoQuote*{<}{>}
+
+% DES: Moved turning \| into a shorthand for verbatim material until later since it breaks something in the biblatex package
+
+\newcommand*{\allowbreakhere}{\discretionary{}{}{}}
+
+\newcommand*{\biber}{\sty{biber}\xspace}
+\newcommand*{\biblatex}{\sty{biblatex}\xspace}
+\newcommand*{\biblatexml}{\sty{biblatexml}\xspace}
+\newcommand*{\biblatexhome}{http://sourceforge.net/projects/biblatex/}
+\newcommand*{\biblatexctan}{http://ctan.org/pkg/biblatex/}
+
+% DES: Moved \titlepage and \hypersetup to the end of the preamble
+
+% tables
+
+\newcolumntype{H}{>{\sffamily\bfseries\spotcolor}l}
+\newcolumntype{L}{>{\raggedright\let\\=\tabularnewline}p}
+\newcolumntype{R}{>{\raggedleft\let\\=\tabularnewline}p}
+\newcolumntype{C}{>{\centering\let\\=\tabularnewline}p}
+\newcolumntype{V}{>{\raggedright\let\\=\tabularnewline\ttfamily}p}
+
+\newcommand*{\sorttablesetup}{%
+  \tablesetup
+  \ttfamily
+  \def\new{\makebox[1.25em][r]{\ensuremath\rightarrow}\,}%
+  \def\alt{\par\makebox[1.25em][r]{\ensuremath\hookrightarrow}\,}%
+  \def\note##1{\textrm{##1}}}
+
+\newcommand{\tickmarkyes}{\Pisymbol{psy}{183}}
+\newcommand{\tickmarkno}{\textendash}
+\providecommand*{\textln}[1]{#1}
+\providecommand*{\lnstyle}{}
+
+% markup and misc
+
+\setcounter{secnumdepth}{4}
+
+\makeatletter
+
+\newenvironment{nameparts}
+  {\trivlist\item
+   \tabular{@{}ll@{}}}
+  {\endtabular\endtrivlist}
+
+\newenvironment{namedelims}
+  {\trivlist\item
+   \tabularx{\textwidth}{@{}c@{=}l>{\raggedright\let\\=\tabularnewline}X@{}}}
+  {\endtabularx\endtrivlist}
+
+\newenvironment{namesample}
+  {\def\delim##1##2{\@delim{##1}{\normalfont\tiny\bfseries##2}}%
+   \def\@delim##1##2{{%
+     \setbox\@tempboxa\hbox{##1}%
+     \@tempdima=\wd\@tempboxa
+     \wd\@tempboxa=\z@
+     \box\@tempboxa
+     \begingroup\spotcolor
+     \setbox\@tempboxa\hb@xt@\@tempdima{\hss##2\hss}%
+     \vrule\lower1.25ex\box\@tempboxa
+     \endgroup}}%
+   \ttfamily\trivlist
+   \setlength\itemsep{0.5\baselineskip}}
+  {\endtrivlist}
+
+\makeatother
+
+\newrobustcmd*{\Deprecated}{%
+  \textcolor{spot}{\margnotefont Deprecated}}
+\newrobustcmd*{\DeprecatedMark}{%
+  \leavevmode\marginpar{\Deprecated}}
+\newrobustcmd*{\LF}{%
+  \textcolor{spot}{\margnotefont Label field}}
+\newrobustcmd*{\LFMark}{%
+  \leavevmode\marginpar{\LF}}
+\newrobustcmd*{\CSdelim}{%
+  \textcolor{spot}{\margnotefont Context Sensitive}}
+\newrobustcmd*{\CSdelimMark}{%
+  \leavevmode\marginpar{\CSdelim}}
+
+
+\newcommand*{\seestyleexample}[1]{%
+  \leavevmode
+  \marginpar{%
+    \raggedright
+    \footnotesize
+    Style example:\\
+    \href{file:examples/#1.pdf}{local},
+    \href{http://mirrors.ctan.org/macros/latex/contrib/biblatex/doc/examples/#1.pdf}
+    {online}.}%
+  \ignorespaces}
+
+% following snippet is based on code by Michael Ummels (TeX Stack Exchange)
+% <http://tex.stackexchange.com/a/13073/8305>
+\makeatletter
+  \newcommand\fnurl@[1]{\footnote{\url@{#1}}}
+  \DeclareRobustCommand{\fnurl}{\hyper@normalise\fnurl@}
+\makeatother
+
+\hyphenation{%
+  star-red
+  bib-lio-gra-phy
+  white-space
+}
+
+% DES: Begin additions/changes to biblatex.tex preamble
+\titlepage{%
+	title={Bib\LaTeX\ Style for Creating a Curriculum Vitae},
+	subtitle={Datatypes and Formatting Macros},
+	url={https://github.com/danielshub/biblatex-cv/},
+	author={Daniel E. Shub},
+	email={daniel.e.shub@gmail.com},
+	revision={0.01},
+	date={\today}%
+}
+
+\hypersetup{%
+	pdftitle={The biblatex-cv manual},
+	pdfsubject={Bib\LaTeX\ Style for Creating a Curriculum Vitae},
+	pdfauthor={Daniel E. Shub},
+	pdfkeywords={latex, biblatex, cv, style}
+}
+
+\usepackage{biblatex-cv}
+\highlightname{Doe}{Jon}{}{}{027b2ae6656319c839604b56b18b4292}
+\addbibresource{biblatex-cv.bib}
+
+\newcommand{\exampitem}[1]{\begingroup%
+  \par\itemsep0.5\itemsep\item%
+  Default Output: \par%
+  \printbibliography[env = unnumbered, resetnumbers = true, check = #1]%
+\endgroup}
+
+\MakeShortVerb{\|}
+
+\begin{document}
+\nocite{*}
+\printtitlepage
+\tableofcontents
+
+\section{Introduction}
+\subsection{About}
+This package is a \biblatex\ style for creating an academic curriculum vitae (CV) from a \bibtex\ \file{.bib} file using \biber\slash\biblatex. In addition to the standard publication types, an academic CV contains information about funding, teaching, mentoring, and other accomplishments. Depending on the purpose of the CV, the grouping of the items within a category changes. For example, when applying for jobs, it is often desirable to group teaching by whether it is at the undergraduate or graduate level (or maybe by class size), but when applying for promotion, you may need to group teaching depending on if the classes were inside/outside your department. The same goes for mentoring. In some cases it may make sense to group by the program/department the students/post-docs were enrolled and in other cases it may make sense to group undergraduate students separately. The purpose of this package is to harness the power of \biber\slash\biblatex\ to automatically group items on a CV and ensure consistent formatting of those items. The package implements a citation style (\file{biblatex-cv.cbx}), a references section style (\file{biblatex-cv.bbx}), a data model (\file{biblatex-cv.dbx}) that includes enhancements and additional entry types over the standard data model, and a string localization file (\file{american-cv.lbx}). It also includes a standard \latex\ package (\file{biblatex-cv.sty}) which provides useful interfaces for grouping items on the CV. Localization support is provided for CV specific strings in the accompanying \file{american-cv.lbx} file.
+
+The \sty{biblatex-cv} data model includes a number of additional entry types beyond those provided by the standard \biblatex\ data model. The \sty{biblatex-cv} data model, however, does not include all possible entry types that might appear on a CV. For example, it lacks an entry type related to employment, even though every CV likely includes employment history. The additional data types that are included in the \sty{biblatex-cv} data model were chosen based on the perceived likelihood that an individual might want to tailor the formatting, grouping, and/or ordering of the items of a particular entry type for a particular purpose. Future versions of the \sty{biblatex-cv} data model will likely include additional entry types and hopefully someday it will be possible to fully generate an academic CV directly from a \file{.bib} file.
+
+\subsection{License}
+Copyright \textcopyright\ 2020-- Daniel E. Shub. Permission is granted to copy, distribute and\slash or modify this software under the terms of the \lppl, version~1.3.\fnurl{http://www.latex-project.org/lppl.txt}. The current maintainer is Daniel Shub.
+
+\subsection{Feedback}
+Bug reports, comments and ideas are welcome. Please use the project page on GitHub to report bugs and submit feature requests.\fnurl{https://github.com/danielshub/biblatex-cv/}.
+
+\subsection{Acknowledgments}
+This package was motivated by the amazing improvements \bibtex\slash\biblatex\ provides over \bibtex\ for managing bibliographies. The data model and formatting macros provided by \biblatex\ allows a user with a good working knowledge of \latex\ to design new bibliography and citation styles. The \sty{biblatex-publist}\fnurl{https://github.com/jspitz/biblatex-publist} style provided a lot of inspiration of for this package and shows the flexiblity of \biblatex.
+
+\section{Use}
+This package is available at \url{https://github.com/danielshub/biblatex-cv/}. To install manually, you can download it and then put the \file{.cbx}, \file{.bbx}, \file{.lbx}, \file{.dbx}, and \file{.sty} files in your texmf tree (???). An example document is provided at the end of this document, but briefly, you specify the style in the usual way when loading \biblatex. While the style can be loaded just like any other \biblatex\ style, it is best to load it with |\usepackage{biblatex-cv}|. The \sty{biblatex-cv} package loads \biblatex\ with useful options as well as providing macros that are useful for grouping items in a CV. It can be loaded with:
+
+\begin{ltxcode}
+\usepackage[american]{babel}
+\usepackage{biblatex-cv}
+\end{ltxcode}
+
+\subsection{Package options}
+The verbosity of the output can be controlled by passing options to \sty{biblatex-cv}. These options include 
+\begin{ltxcode}
+verbose-committee
+verbose-education
+verbose-teaching
+verbose-lists
+\end{ltxcode}
+
+\noindent The options |verbose-committee|, |verbose-education|, and |verbose-teaching| respectively control how verbose the lists of committees, education, and teaching are. The |verbose-lists| option is the same as passing |verbose-committee|, |verbose-education|, and |verbose-teaching|. 
+
+\subsection{Package and Base Styles}
+	The citation style (\path{biblatex-cv.cbx}) is an unmodified version of the \biblatex\ |authoryear| citation style. The bibliography style (\path{biblatex-cv.bbx}) is based on the corresponding \biblatex\ |authoryear| style, but it patches a couple of the standard macros to provide additional functionality. The bibliography style essentially just adds bibliography drivers for the new entry types and provides a number of |toggles| to control the information that is presented. These |toggles| are in the form |cv@blx@ENTRYTYPE:FIELD|. The package (\path{biblatex-cv.sty}) provides macros for controlling the grouping and format of the items on the CV. The |\highlightname| macro is used to identify a particular name for special treatment. By default the name is made bold face in lists of authors and deleted from lists of presenters. The package also provides |numbered| and |unnumbered| bibliography environments. The numbers decrease in the |numbered| environment.
+
+\section{Database Guide}
+This package contains the following files:
+\begin{description}
+	\item[\path{american-cv.lbx}] The |biblatex-cv| localization files. This file provides language-specific macros for some fixed strings commonly used in academic CVs.
+	\item[\path{biblatex-cv.bbx}] The \sty{biblatex-cv} bibliography style. It is based on the standard \biblatex\ |authoryear| style but provides bibliography drivers for the new entry types and some minor modifications to the standard entry types.
+	\item[\path{biblatex-cv.bib}] The \file{.bib} entries used to provided the examples in this document.
+	\item[\path{biblatex-cv.cbx}] The \sty{biblatex-cv} citations style. It is just the standard \biblatex\ |authoryear| style.
+	\item[\path{biblatex-cv.dbx}] The \sty{biblatex-cv} data model. It is based on the standard \biblatex\ data model but provides enhancements and additional entry types to allow users to utilize more natural entry type and field names for certain entries.
+	\item[\path{biblatex-cv.sty}] A \latex\ package that provides macros for controlling the grouping and format of the items on the CV.
+	\item[\path{biblatex-cv.tex}] This document.
+	\item[\path{cv.tex}] An example CV populated by the entries in \path{biblatex-cv.bib}.
+\end{description}
+
+\subsection{New Entry Types}
+This section gives an overview of the novel entry types supported by the \sty{biblatex-cv} package data model along with the fields supported by each type. The lists below indicate the fields supported by each entry type. Note that the <required> fields are not strictly required in all cases. The fields marked as <optional> are optional in a technical sense. The \sty{biblatex-cv} package data model defines a few constraints for the format of certain fields. These are only validated against the data model with \biber's \opt{--validate-datamodel} option, however, the grouping features provided by the \sty{biblatex-cv} package assume the data model has been validated. Some generic fields like \bibfield{abstract} and \bibfield{annotation} or \bibfield{label} and \bibfield{shorthand} are not included in the lists below because they are independent of the entry type. See the \sty{biblatex-cv} data model specification in the file \file{biblatex-cv.dbx} for a complete specification.
+
+\begin{typelist}
+	\typeitem{abstract}
+		A published abstract in a journal, proceedings, or other location. While an abstract is often associated with a presentation, only a single entry should be made in the database since there is no way to automatically suppress the duplicate output. This entry type nearly identical to the \bibtype{article} entry type except it has the additional mandatory fields \bibfield{entrysubtype}, \bibfield{presentationtype}, and \bibfield{presenter}. The output format is also similar to that of the \bibtype{article} entry type. To work with the built in bibliography filters, the field \bibfield{entrysubtype} is constrained to be |poster| or |talk|.
+	\reqitem{author, title, journaltitle, year/date, entrysubtype, presentationtype, presenter}
+	\optitem{translator, annotator, commentator, subtitle, titleaddon, editor, editora, editorb, editorc, journalsubtitle, issuetitle, issuesubtitle, language, origlanguage, series, volume, number, eid, issue, month, pages, version, note, issn, addendum, pubstate, doi, eprint, eprintclass, eprinttype, url, urldate}
+	\exampitem{Abstract}
+
+	\typeitem{committee}
+		A committee entry is designed to reflect administrative service committees that have been served on. The field \bibfield{title} is the name of the committee. To work with the built in bibliography filters, the field \bibfield{entrysubtype} is constrained to be |departmental|, |external|, or |institutional|.
+	\reqitem{date, entrysubtype, title, institution}
+	\optitem{location, department, role, semesters}
+	\exampitem{Committee}
+	
+	\typeitem{school}
+		A school is place where one studied and possibly earned a \bibtype{degree}. It is closely coupled with the \bibtype{degree} entry type.
+	\reqitem{date, institution, location}
+	\optitem{department, degreelist, gpa, honors}
+
+	\typeitem{degree}
+		A degree is something you earn at a \bibtype{school}. It is closely coupled with the \bibtype{school} entry type.
+	\reqitem{date, institution, location}
+	\optitem{department, degree, gpa, honors, major, minor, concentration, advisor, committee, title}
+	\exampitem{Education}
+
+	\typeitem{funding}
+		An entry type for recording funding and grants. To work with the built in bibliography filters, the field \bibfield{entrysubtype} is constrained to be |individual| or |institutional| and the field \bibfield{status} is constrained to be |completed|, |ongoing|, |pending|, |submitted|, or |unsuccessful|.
+	\reqitem{date, entrysubtype, status, author, funder}
+	\optitem{title, role, amount, currency, number, type}
+	\exampitem{Funding}
+
+	\typeitem{presentation}
+		A typically unpublished presentation from a conference or seminar, or other event. While a presentation is often associated with an abstract, only a single entry should be made in the database since there is no way to automatically suppress the duplicate output. To work with the built in bibliography filters, the field \bibfield{entrysubtype} is constrained to be |poster| or |talk|.
+	\reqitem{date, entrysubtype, author, presentationtype, presenter, title, institution, location}
+	\optitem{department}
+	\exampitem{Presentation}
+
+	\typeitem{student}
+		An entry type for students and other individuals that you hae been a mentor to or examined. To work with the built in bibliography filters, the field \bibfield{entrysubtype} is constrained to be |masters|, |phd|, |postdoc|, or |undergraduate| and the field \bibfield{role} is constrained to be |externalexaminer|, |internalexaminer|, |secondsupervisor|, or |supervisor|.
+	\reqitem{date, entrysubtype, role, name, institution, location}
+	\optitem{department}
+	\exampitem{Student}
+
+	\typeitem{teaching}
+		An entry type for classes that you have taught. To work with the built in bibliography filters, the field \bibfield{entrysubtype} is constrained to be |graduate| or |undergraduate|. The optional field \bibfield{classes} can be used in conjunction with the field \bibfield{crossref} when you have taught multiple sections of a particular class or have taught it over multiple years.
+	\reqitem{date, entrysubtype, title, department, institution, location}
+	\optitem{number, numlectures, numstudents, role, classes}
+	\exampitem{Teaching}
+
+\end{typelist}
+
+\subsection{Modified Entry Types}
+This section gives an overview of the modifications made to the standard entry types. Changes have been made to both the underlying data model and its constraints as well as the bibliography drivers and the underlying macros that format the output. The bibliography drivers for all entry types except the \bibtype{shorthand} and \bibtype{set} entry types, have been modified to not print the field \bibfield{note} in the standard location, but rather before the page reference and related type information. The field \bibfield{note} is now provided along with bibliometric information. The bibliometrics information is currently limited to the field \bibfield{numcites}.
+
+\begin{typelist}
+	\typeitem{article}
+		This is the standard \bibtype{article} entry type modified to have an additional mandatory field \bibfield{numcites}.
+	\typeitem{unpublished}
+		This is the standard \bibtype{unpublished} entry type modified to have an additional optional field \bibfield{journaltitle}.
+	\typeitem{unpublished}
+		This is the standard \bibtype{thesis} entry type but modified to work with the built in bibliography filters by constraining the field \bibfield{type} to be |doctoralthesis|, |mastersthesis|, or |undergradthesis|.
+\end{typelist}
+
+\subsection{New Entry Fields}
+\begin{fieldlist}
+	\listitem{advisor}{name} The advisor(s) for the entry type \bibtype{degree}.
+
+	\listitem{committee}{name} The committee member(s) for the entry type \bibtype{degree}.
+
+	\listitem{name}{name} The name of the student for the entry type \bibtype{student}. While technically a list, it is probably not advisable to use it as such and each \bibtype{student} entry should be for a single student.
+
+	\listitem{presenter}{name} The presenter(s) of a piece of work for the entry types \bibtype{abstract} and \bibtype{presentation}.
+
+	\listitem{concentration}{literal} A list of concentration areas for the entry type \bibtype{degree}.
+
+	\listitem{honors}{literal} A list of honors associated with the entry type \bibtype{degree}.
+
+	\listitem{minor}{literal} A list of minors associated with the entry type \bibtype{degree}.
+
+	\fielditem{amount}{integer} The amount of money for the entry type \bibtype{funding}.
+
+	\fielditem{numcites}{integer} The number of citations for a particular item.
+
+	\fielditem{numlectures}{integer} The number of lectures/classes for the entry type \bibtype{teaching}.
+
+	\fielditem{numstudents}{integer} The number of students in a class for the entry type \bibtype{teaching}.
+
+	\fielditem{currency}{literal} The currency of the field \bibfield{amount}.
+
+	\fielditem{degree}{literal} The degree earned for the entry type \bibtype{degree}.
+
+	\fielditem{department}{literal} An additional field that allows finer grain control of the \bibfield{institution} and \bibfield{location}. Unlike \bibfield{institution} and \bibfield{location}, \bibfield{department} is a field and not a list.
+
+	\fielditem{funder}{literal} The name of the funding institute for the entry type \bibtype{funding}.
+
+	\fielditem{gpa}{literal} The grade point average for the entry types \bibtype{degree} and \bibtype{school}.
+
+	\fielditem{major}{literal} The major for the entry type \bibtype{degree}.
+
+
+	\fielditem{presentationtype}{literal} The type of presentation for the entry types \bibtype{abstract} and \bibtype{presentation}. To work with the built in bibliography filters, the field should be constrained to be |contributed|, |internal|, |invited|, |job|, or |keynote|.
+
+	\fielditem{role}{key} The role (e.g., chair or secretary) that was served for entry type \bibtype{committee}.
+
+	\fielditem{status}{key} The status of the entry type \bibtype{funding}.
+
+	\fielditem{classes}{separated list of entrykeys} A comma separated list of keys to other \bibtype{teaching} entries. This can be useful if you taught a class multiple semesters and/or multiple sections of a class.
+
+	\fielditem{degreelist}{separated list of entrykeys} A comma separated list of \bibtype{degree} entries earned at the corresponding \bibtype{school}.
+
+	\fielditem{semesters}{separated list of entrykeys} a comma separated list of keys to other committee entries. This can be useful if you served on a committee for multiple years serving different roles.
+
+\end{fieldlist}
+
+\section{Example}
+The following example will create a boring looking CV. There is no reason you cannot make the formatting nicer. The purpose of this package is to control the sorting, grouping, and formatting of the items on the CV and not the CV itself.
+
+\begin{ltxcode}
+\documentclass{article}
+\usepackage[american]{babel}
+\usepackage{biblatex-cv}
+% The crazy number comes from the .bbl file
+\highlightname{Doe}{Jon}{}{}{027b2ae6656319c839604b56b18b4292}
+\addbibresource{biblatex-cv.bib}
+
+\begin{document}
+  \nocite{*}
+  \section*{Education}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Education]
+
+  \section*{Funding}
+  \printbibliography[env = numbered, resetnumbers = true, check = Funding]
+
+  \section*{Abstracts}
+  \printbibliography[env = numbered, resetnumbers = true, check = Abstract]
+
+  \section*{Research Presentations}
+  \printbibliography[env = numbered, resetnumbers = true, check = Presentation]
+
+  \section*{Teaching}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Teaching]
+
+  \section*{Service}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Committee]
+
+  \section*{Mentoring}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Student]
+\end{document}
+\end{ltxcode}
+
+If instead of showing all your teaching together, you want to group by graduate and undergraduate teaching, that is as simply as changing |check = Teaching| to |check = Teaching:Graduate| and |check = Teaching:Undergraduate|. Grouping by the institute where the teaching was done is a little harder, since we do not know where you have taught. First you have to define the checks:
+\begin{ltxcode}
+\defbibcheck{Teaching:Oxford}{%
+  \ifentrytype{teaching}{}{\skipentry}%
+  \iffieldequalstr{institution}{Oxford}{}{\skipentry}%
+}
+\defbibcheck{Teaching:Cambridge}{%
+  \ifentrytype{teaching}{}{\skipentry}%
+  \iffieldequalstr{institution}{Cambridge}{}{\skipentry}%
+}
+\end{ltxcode}
+
+\noindent and then you can use |check = Teaching:Oxford| and |check = Teaching:Cambridge|. Of course if you group by university, you may not want to include the university in the reference. That can be controlled with |\togglefalse{cv@blx:teaching:institution}| and if you want to get rid of the department and location, there are toggles for that too. There are lots of checks and toggles predefined in \sty{biblatex-cv}. just look through the \file{biblatex-cv.sty} to see if what you need exists. If not, there is hopefully an example that will get you close.
+\end{document}
+
+% arara: clean: { extensions: [ aux, bbl, bcf, blg, out, run.xml, toc ] }
+% arara: clean: { extensions: [ log, pdf ] }
+% arara: xelatex: { options: [ '-halt-on-error' ], interaction: batchmode }
+% arara: biber: { options: [ '--validate_datamodel' ] }
+% arara: xelatex: { options: [ '-halt-on-error' ], interaction: batchmode }
+% arara: --> until !found('log', 'Rerun to get cross-references right.')
+% arara: --> && !found('log', 'There were undefined references.')
+% arara: clean: { extensions: [ aux, bbl, bcf, blg, out, run.xml, toc ] }
+% arara: clean: { extensions: [ log ] }

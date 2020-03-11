@@ -1,0 +1,40 @@
+\documentclass{article}
+\usepackage[american]{babel}
+\usepackage{biblatex-cv}
+% The crazy number comes from the .bbl file
+\highlightname{Doe}{Jon}{}{}{027b2ae6656319c839604b56b18b4292}
+\addbibresource{biblatex-cv.bib}
+
+\begin{document}
+  \nocite{*}
+  \section*{Education}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Education]
+
+  \section*{Funding}
+  \printbibliography[env = numbered, resetnumbers = true, check = Funding]
+
+  \section*{Abstracts}
+  \printbibliography[env = numbered, resetnumbers = true, check = Abstract]
+
+  \section*{Research Presentations}
+  \printbibliography[env = numbered, resetnumbers = true, check = Presentation]
+
+  \section*{Teaching}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Teaching]
+
+  \section*{Service}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Committee]
+
+  \section*{Mentoring}
+  \printbibliography[env = unnumbered, resetnumbers = true, check = Student]
+\end{document}
+
+% arara: clean: { extensions: [ aux, bbl, bcf, blg, out, run.xml, toc ] }
+% arara: clean: { extensions: [ log, pdf ] }
+% arara: pdflatex: { options: [ '-halt-on-error' ], interaction: batchmode }
+% arara: biber: { options: [ '--validate_datamodel' ] }
+% arara: pdflatex: { options: [ '-halt-on-error' ], interaction: batchmode }
+% arara: --> until !found('log', 'Rerun to get cross-references right.')
+% arara: --> && !found('log', 'There were undefined references.')
+% arara: clean: { extensions: [ aux, bbl, bcf, blg, out, run.xml, toc ] }
+% arara: clean: { extensions: [ log ] }

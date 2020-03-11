@@ -1,0 +1,347 @@
+%@Abstract{Abstract:,
+  %Author                   = {},
+  %Title                    = {},
+  %Journaltitle             = {},
+  %Date                     = {},
+  %Entrysubtype             = {},
+  %PresentationType         = {},
+  %Presenter                = {},
+%}
+
+%@Committee{Committee:,
+  %Date                     = {},
+  %Entrysubtype             = {},
+  %Title                    = {},
+  %Institution              = {},
+  %Location                 = {},
+  %Department               = {},
+  %Role                     = {},
+  %Semesters                = {},
+  %crossref                 = {},
+%}
+
+%@School{School:,
+  %Date                     = {},
+  %Institution              = {},
+  %Location                 = {},
+  %Department               = {},
+  %GPA                      = {},
+  %Honors                   = {},
+  %DegreeList               = {},
+%}
+
+%@Degree{Degree:,
+  %Date                     = {},
+  %Institution              = {},
+  %Location                 = {},
+  %Department               = {},
+  %Degree                   = {},
+  %GPA                      = {},
+  %Honors                   = {},
+  %Concentration            = {},
+  %Advisor                  = {},
+  %Committee                = {},
+  %Title                    = {},
+  %crossref                 = {},
+%}
+
+%@Funding{Funding:,
+  %Date                     = {},
+  %Entrysubtype             = {},
+  %Status                   = {},
+  %Author                   = {},
+  %Funder                   = {},
+  %Title                    = {},
+  %Role                     = {},
+  %Amount                   = {},
+  %Currency                 = {},
+  %Number                   = {},
+  %Type                     = {},
+%}
+
+%@Presentation{Presentation:,
+  %Date                     = {},
+  %Entrysubtype             = {},
+  %Author                   = {},
+  %PresentationType         = {},
+  %Presenter                = {},
+  %Title                    = {},
+  %Institution              = {},
+  %Location                 = {},
+  %Department               = {},
+%}
+
+%@Student{Student:,
+  %Date                     = {},
+  %Entrysubtype             = {},
+  %Name                     = {},
+  %Role                     = {},
+  %Institution              = {},
+  %Location                 = {},
+  %Department               = {},
+%}
+
+%@Teaching{Teaching:,
+  %Date                     = {},
+  %Entrysubtype             = {},
+  %Title                    = {},
+  %Department               = {},
+  %Institution              = {},
+  %Location                 = {},
+  %Number                   = {},
+  %NumLectures              = {},
+  %NumStudents              = {},
+  %Role                     = {},
+  %classes                  = {},
+%}
+
+@XData{Author:Me,
+  Author                   = {Doe, Jon},
+}
+
+@XData{Author:Us,
+  Author                   = {Doe, Jon and Smith, Alice and Jones, Bob},
+}
+
+@XData{Author:Them,
+  Author                   = {Smith, Alice and Jones, Bob},
+}
+
+@XData{Institution:Departmental,
+  Institution              = {My Institution},
+  Location                 = {My City},
+  Department               = {My Department},
+}
+
+@XData{Institution:External,
+  Institution              = {Their Institution},
+  Location                 = {Their City},
+  Department               = {Their Department},
+}
+
+@XData{Institution:Institutional,
+  Institution              = {My Institution},
+  Location                 = {My City},
+}
+
+@XData{Presenter:Me,
+  Presenter                = {Doe, Jon},
+}
+
+@XData{Presenters:Us,
+  Presenter                = {Doe, Jon and Smith, Alice and Jones, Bob},
+}
+
+@XData{Presenters:Them,
+  Presenter                = {Smith, Alice and Jones, Bob},
+}
+
+@Abstract{Abstract:PosterContributedJoint,
+  xdata                    = {Author:Us, Presenters:Me},
+  Title                    = {A Contributed Poster Abstract},
+  Journaltitle             = {Journal of Poster Abstracts},
+  Date                     = {2020-01-01},
+  Entrysubtype             = {poster},
+  PresentationType         = {contributed},
+}
+
+@Abstract{Abstract:TalkInternalSolo,
+  xdata                    = {Author:Them, Presenters:Them},
+  Title                    = {An Internal Talk Abstract},
+  Journaltitle             = {Journal of Talk Abstracts},
+  Date                     = {2019-01-01},
+  Entrysubtype             = {talk},
+  PresentationType         = {internal},
+}
+
+@Abstract{Abstract:TalkInvitedOther,
+  xdata                    = {Author:Me, Presenters:Us},
+  Title                    = {An Invited Talk Abstract},
+  Journaltitle             = {Journal of Talk Abstracts},
+  Date                     = {2018-01-01},
+  Entrysubtype             = {talk},
+  PresentationType         = {invited},
+}
+
+@Committee{Committee:Departmental,
+  Semesters                = {Committee:DepartmentalSemesterA, Committee:DepartmentalSemesterB},
+  xdata                    = {Institution:Departmental},
+  Date                     = {2010-23/2019-21},
+  Entrysubtype             = {departmental},
+  Title                    = {An Example Departmental Committee With Semesters},
+
+  Role                     = {},
+}
+
+@Committee{Committee:DepartmentalSemesterA,
+  crossref                 = {Committee:Departmental},
+  Date                     = {2010-23/2015-21},
+  Role                     = {Secretary},
+}
+
+@Committee{Committee:DepartmentalSemesterB,
+  crossref                 = {Committee:Departmental},
+  Date                     = {2015-22/2019-21},
+  Role                     = {Chair},
+}
+
+@Committee{Committee:External,
+  xdata                    = {Institution:External},
+  Date                     = {2015-23},
+  Entrysubtype             = {external},
+  Title                    = {An Example External Committee Without Semesters},
+  Role                     = {Consultant},
+}
+
+@Committee{Committee:Institutional,
+  xdata                    = {Institution:Institutional},
+  Date                     = {2017-21/2019-22},
+  Entrysubtype             = {institutional},
+  Title                    = {An Example Institutional},
+  Role                     = {},
+}
+
+@School{School:Degree,
+  Date                     = {2010-23/2019-21},
+  Institution              = {My Institution},
+  Location                 = {My City},
+  GPA                      = {3.5},
+  Honors                   = {Institution Honors},
+  DegreeList               = {Degree:MS, Degree:PhD},
+}
+
+@Degree{Degree:PhD,
+  Date                     = {2019-21},
+  Department               = {My PhD Department},
+  Degree                   = {PhD},
+  GPA                      = {4.0},
+  Honors                   = {PhD Honors},
+  Concentration            = {PhD Concentration},
+  Advisor                  = {Jones, Alice},
+  Committee                = {Jones, Alice and Smith, Bob},
+  Title                    = {My PhD Title},
+  crossref                 = {School:Degree},
+}
+
+@Degree{Degree:MS,
+  Date                     = {2012-21},
+  Department               = {My MS Department},
+  Degree                   = {MS},
+  GPA                      = {3.0},
+  Advisor                  = {Smith, Bob},
+  Committee                = {Jones, Alice and Smith, Bob},
+  Title                    = {My MS Title},
+  crossref                 = {School:Degree},
+}
+
+@School{School:NoDegree,
+  xdata                    = {Institution:External},
+  Date                     = {2009-21},
+  GPA                      = {2.0},
+  Honors                   = {My Other Honors},
+}
+
+@Funding{Funding:IndividualOngoing,
+  xdata                    = {Author:Us},
+  Date                     = {2019-01/2021-01},
+  Entrysubtype             = {individual},
+  Status                   = {ongoing},
+  Funder                   = {Funding Agency},
+  Title                    = {A Grant Title},
+  Role                     = {pi},
+  Amount                   = {100,000,000},
+  Currency                 = {\$},
+  Number                   = {123-456-abc},
+  Type                     = {Research Grant},
+}
+
+@Funding{Funding:InstitutionalCompleted,
+  xdata                    = {Author:Us},
+  Date                     = {2010-01/2019-01},
+  Entrysubtype             = {Institutional},
+  Status                   = {completed},
+  Funder                   = {A Different Funding Agency},
+  Title                    = {A Different Grant Title},
+  Role                     = {ci},
+  Amount                   = {1,000,000},
+  Currency                 = {\pounds},
+  Number                   = {abc-def-123},
+  Type                     = {Fellowship},
+}
+
+
+@Presentation{Presentation:PosterContributedJoint,
+  xdata                    = {Author:Us, Presenters:Me, Institution:External},
+  Title                    = {A Contributed Poster Presentation},
+  Date                     = {2020-01-01},
+  Entrysubtype             = {poster},
+  PresentationType         = {contributed},
+}
+
+@Presentation{Presentation:TalkInternalSolo,
+  xdata                    = {Author:Them, Presenters:Them, Institution:Departmental},
+  Title                    = {A Departmental Talk Presentation},
+  Date                     = {2019-01-01},
+  Entrysubtype             = {talk},
+  PresentationType         = {internal},
+}
+
+@Presentation{Presentation:TalkInvitedOther,
+  xdata                    = {Author:Me, Presenters:Us, Institution:Institutional},
+  Title                    = {An Institutional Invited Talk Presentation},
+  Date                     = {2018-01-01},
+  Entrysubtype             = {talk},
+  PresentationType         = {invited},
+}
+
+@Student{Student:SupervisorMS,
+  xdata                    = {Institution:Departmental},
+  Date                     = {2018-23/2020-21},
+  Entrysubtype             = {masters},
+  Name                     = {Smith, Alice},
+  Role                     = {supervisor},
+}
+
+@Student{Student:InternalExaminerPhD,
+  xdata                    = {Institution:External},
+  Date                     = {2016-24/2018-22},
+  Entrysubtype             = {phd},
+  Name                     = {Jones, Bob},
+  Role                     = {internalexaminer},
+}
+
+@Teaching{Teaching:Graduate,
+  xdata                    = {Institution:Departmental},
+  Date                     = {2020-23},
+  Entrysubtype             = {graduate},
+  Title                    = {A Graduate Class},
+  Number                   = {EE401},
+  NumLectures              = {36},
+  NumStudents              = {100},
+  Role                     = {Instructor of Record},
+}
+
+@Teaching{Teaching:Undergraduate,
+  xdata                    = {Institution:Departmental},
+  Date                     = {2019-21/2020-22},
+  Entrysubtype             = {undergraduate},
+  Title                    = {An Undergraduate Class},
+  Number                   = {EE101},
+  classes                  = {Teaching:Undergraduate20, Teaching:Undergraduate19},
+}
+
+@Teaching{Teaching:Undergraduate20,
+  crossref                 = {Teaching:Undergraduate},
+  Date                     = {2020-22},
+  NumLectures              = {36},
+  NumStudents              = {100},
+  Role                     = {Instructor of Record},
+}
+
+@Teaching{Teaching:Undergraduate19,
+  crossref                 = {Teaching:Undergraduate},
+  Date                     = {2019-21},
+  NumLectures              = {13},
+  NumStudents              = {10},
+  Role                     = {ta},
+}
