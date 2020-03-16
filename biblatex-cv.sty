@@ -24,6 +24,9 @@
 \setlength{\biblabelsep}{0.5em}
 \defbibheading{bibliography}{}
 
+\toggletrue{cv@blx:delete:author}
+\toggletrue{cv@blx:delete:presenter}
+
 \toggletrue{cv@blx:pubstate}
 
 \togglefalse{cv@blx:funding:hidePI}
@@ -558,41 +561,41 @@
 	\iffieldequalstr{entrysubtype}{undergraduate}{}{\skipentry}%
 }
 
-% Emphasize a name throughout the CV. We need to patch the name formats and not the underlying bib macros since the bib macros might only get initials and not the full name. Ideally this would work with multiple names.
-\newcommand{\cv@blx@highlightname@format}{\textbf}
-\newcommand{\cv@blx@highlightname}{}
-\newcommand{\cv@blx@highlightnamehash}{XXXXXXXXXX}
-\newcommand{\highlightname}[5]{%
-	\renewcommand{\cv@blx@highlightname}{#1|#2|#3|#4}%
-	\renewcommand{\cv@blx@highlightnamehash}{#5}%
+% Create a biblatex/biber MD5 hash from the parts of a name and store the hashes so that the name can be emphasized and/or deleted throughout the CV. If seems like \zap@space and ExplSyntax do not play nice together. There is probably a much cleaner way of doing this. Basically, the \highlightname macro concatenates the name parts, strips any spaces, calculates the hash, and then converts the hash to all lower case letters. The code does not handle periods in the name the same way that biblatex/biber does and therefore the input to \highlightname should probably not have periods.
+\newcommand{\highlightname}[4]{% family, given, prefix, suffix
+	\edef\cv@blx@highlightname@hash{\zap@space #1#2#3#4 \@empty}%
+	\ifxetex%
+		\expandafter\edef\expandafter\cv@blx@highlightname@hash\expandafter{%
+			\expandafter\mdfivesum\expandafter{%
+				\cv@blx@highlightname@hash%
+			}%
+		}%
+	\else%
+		\expandafter\edef\expandafter\cv@blx@highlightname@hash\expandafter{%
+			\expandafter\pdfmdfivesum\expandafter{%
+				\cv@blx@highlightname@hash%
+			}%
+		}%
+	\fi%
+	\cv@blx@highlightname%
 }
 
 \ExplSyntaxOn
-	\NewDocumentCommand{\cv@blx@deleteName}{mm}{% Hash, Authors
-		\tl_set:Nn\l_tmpa_tl{#2}%
-		\str_if_in:nnTF{#2}{hash=#1}{%
-			\numdef\NewCount{\NewCount-1}%
-			\regex_replace_all:nnN{\cB\{\cB\{.*?hash=#1.*?\cE\}\cE\}\cE\}}{}\l_tmpa_tl%
-			\edef\NewValue{\l_tmpa_tl}%
-			\blx@bbl@addfield{presenterdeleted}{1}%
-		}{}%
+	\newcommand{\cv@blx@highlightname}{%
+		\edef\cv@blx@highlightname@hash{%
+			\text_lowercase:n{\cv@blx@highlightname@hash}%
+		}%
+		\listxadd{\cv@blx@highlightname@hash@list}{%
+			\cv@blx@highlightname@hash%
+		}%
 	}
 \ExplSyntaxOff
 
-\DeclareNameInputHandler{presenter}{%
-	\expandafter\expandafter\expandafter\cv@blx@deleteName%
-	\expandafter\expandafter\expandafter{%
-		\expandafter\cv@blx@highlightnamehash\expandafter%
-	}\expandafter{%
-		\NewValue%
-	}%
-}
-
+% Emphasized a name throughout the CV. We patch the name formats and not the underlying bib macros, since this allows us to compare the name hash instead of the name parts. This seems more robust to things like initials and different name ordering schemes 
+\newcommand{\cv@blx@highlightname@format}{\textbf}
 \newcommand{\cv@blx@highlightname@patch}{%
 	\begingroup% Needs to be ended by an \xapptonameformat
-		\def\bibnamedelima{ }%
-		\long\edef\@tempa{\namepartfamily|\namepartgiven|\namepartprefix|\namepartsuffix}%
-		\ifdefequal{\cv@blx@highlightname}{\@tempa}{%
+		\xifinlist{\thefield{hash}}{\cv@blx@highlightname@hash@list}{%
 			\let\mkbibnamegiven=\cv@blx@highlightname@format%
 			\let\mkbibnamefamily=\cv@blx@highlightname@format%
 			\let\mkbibnameprefix=\cv@blx@highlightname@format%
@@ -607,6 +610,45 @@
 \xapptonameformat{family-given/given-family}{\endgroup}{}{}
 \xpretonameformat{initsonly}{\cv@blx@highlightname@patch}{}{}
 \xapptonameformat{initsonly}{\endgroup}{}{}
+
+% Delete a name from a list of names. Unlike the emphasizing the name, the deletion is done on a per type (i.e., author, editor, presenter) basis.
+\newcommand{\cv@blx@deletename}[1]{%
+	\expandafter\forlistloop\expandafter{\expandafter\cv@blx@deletename@do\expandafter{\NewValue}{#1}}{\cv@blx@highlightname@hash@list}%
+}
+\ExplSyntaxOn
+	\NewDocumentCommand{\cv@blx@deletename@do}{mmm}{% Name information, Type, Hash
+		\tl_set:Nn\l_tmpa_tl{#1}%
+		\str_if_in:nnTF{#1}{hash=#3}{%
+			\numdef\NewCount{\NewCount-1}%
+			\regex_replace_all:nnN{\cB\{\cB\{.*?hash=#3.*?\cE\}\cE\}\cE\}}{}\l_tmpa_tl%
+			\regex_replace_all:nnN{\cB\{\cB\{.*?hash=#3.*?\cE\}.*?givenun=0.*?\cE\}\cE\}}{}\l_tmpa_tl%
+			\edef\NewValue{\l_tmpa_tl}%
+			\blx@bbl@addfield{#2deleted}{1}%
+		}{}%
+	}
+\ExplSyntaxOff
+
+\newbibmacro{nameDeleted}{%
+	\iffieldequalstr{\currentname deleted}{1}{%
+		\bibstring{with}\addspace%
+	}{%
+		\bibstring{by}\addspace%
+	}%
+}
+\renewcommand{\cv@blx@tempa}[1]{%
+	\DeclareNameInputHandler{#1}{%
+		\iftoggle{cv@blx:delete:#1}{\cv@blx@deletename{#1}}{}%
+	}%
+	\DeclareNameWrapperFormat{#1}{%
+		\iftoggle{cv@blx:delete:#1}{\usebibmacro{nameDeleted}}{}%
+		##1%
+	}%
+}
+\forcsvlist{\cv@blx@tempa}{afterword, annotator, author, bookauthor, %
+	commentator, editor, editora, editorb, editorc, foreword, holder, %
+	introduction, namea, nameb, namec, translator, shortauthor, %
+	shorteditor, advisor, committee, name, presenter%
+}
 
 % Some sections of a CV should have numbered items and some should not. We need to define unnumbered and numbered (with descending labels) bibliography environments. In order for this to work, we need to create a new totcounter every time a new bibliography is started. I think this breaks if there is more than one refsection in the CV, but I am not sure why there would be more than one refsection in a CV.
 \newcounter{cv@blx@bib}
@@ -679,13 +721,18 @@
 	\noinherit{gpa}
 }
 
+\DeclareDataInheritance{teaching}{teaching}{
+	\inherit{entrysubtype}{entrysubtype}
+}
+
 % Deal with the verbose style options
 \iftoggle{cv@blx:verbose:committee}{
 	\DeclareStyleSourcemap{
 		\maps[datatype = bibtex]{
 			\map[overwrite]{
 				\pertype{committee}
-				\step[fieldsource = semesters, fieldset = options,  fieldvalue = {skipbib = true}]
+				\step[fieldsource = semesters, fieldset = options, 
+					fieldvalue = {skipbib = true}]
 			}
 		}
 	}
@@ -694,7 +741,8 @@
 		\maps[datatype = bibtex]{
 			\map[overwrite]{
 				\pertype{committee}
-				\step[fieldsource = crossref,  fieldset = options, fieldvalue = {skipbib = true}]
+				\step[fieldsource = crossref, fieldset = options, 
+					fieldvalue = {skipbib = true}]
 			}
 		}
 	}
@@ -704,13 +752,15 @@
 	\maps[datatype = bibtex]{
 		\map[overwrite]{
 			\pertype{teaching}
-			\step[fieldsource = crossref,  fieldset = options, fieldvalue = {skipbib = true}]
+			\step[fieldsource = crossref, fieldset = options, 
+				fieldvalue = {skipbib = true}]
 		}
 	}
 	\maps[datatype = bibtex]{
 		\map[overwrite]{
 			\pertype{degree}
-			\step[fieldsource = crossref,  fieldset = options, fieldvalue = {skipbib = true}]
+			\step[fieldsource = crossref, fieldset = options, 
+				fieldvalue = {skipbib = true}]
 		}
 	}
 }

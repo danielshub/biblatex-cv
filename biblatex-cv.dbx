@@ -3,10 +3,21 @@
 % Add new data fields for both existing and new entry types
 \DeclareDatamodelFields[type=list, datatype=name]{advisor, committee, name, presenter} 
 \DeclareDatamodelFields[type=list, datatype=literal]{concentration, honors, minor} 
-\DeclareDatamodelFields[type=field, datatype=integer]{amount, numcites, numlectures, numstudents, presenterdeleted}
+\DeclareDatamodelFields[type=field, datatype=integer]{amount, numcites, numlectures, numstudents}
 \DeclareDatamodelFields[type=field, datatype=literal]{currency, degree, department, funder, gpa, major, presentationtype}
 \DeclareDatamodelFields[type=field, datatype=key]{role, status}
 \DeclareDatamodelFields[type=field, format=xsv, datatype=entrykey]{classes, degreelist, semesters}
+
+% For all name lists, create a new field to indicate if a name has been deleted from the list
+\newcommand{\cv@blx@tempa}[1]{%
+	\newtoggle{cv@blx:delete:#1}%
+	\DeclareDatamodelFields[type=field, datatype=integer]{#1deleted}%
+}
+\forcsvlist{\cv@blx@tempa}{afterword, annotator, author, bookauthor, %
+	commentator, editor, editora, editorb, editorc, foreword, holder, %
+	introduction, namea, nameb, namec, translator, shortauthor, %
+	shorteditor, advisor, committee, name, presenter%
+}
 
 % Modify the existing data model inherited from blx-dm.def
 \DeclareDatamodelConstraints{
@@ -67,42 +78,43 @@
 % The data model for the abstract entrytype is a modified version of the article entrytype data model. We start by copying the article data model from blx-dm.def
 \DeclareDatamodelEntrytypes{abstract}
 \DeclareDatamodelEntryfields[abstract]{
-  addendum,
-  annotator,
-  author,
-  commentator,
-  doi,
-  editor,
-  editora,
-  editorb,
-  editorc,
-  editortype,
-  editoratype,
-  editorbtype,
-  editorctype,
-  eid,
-  eprint,
-  eprintclass,
-  eprinttype,
-  issn,
-  issue,
-  issuetitle,
-  issuesubtitle,
-  journalsubtitle,
-  journaltitle,
-  language,
-  note,
-  number,
-  origlanguage,
-  pages,
-  pubstate,
-  series,
-  subtitle,
-  title,
-  titleaddon,
-  translator,
-  version,
-  volume}
+	addendum,
+	annotator,
+	author,
+	commentator,
+	doi,
+	editor,
+	editora,
+	editorb,
+	editorc,
+	editortype,
+	editoratype,
+	editorbtype,
+	editorctype,
+	eid,
+	eprint,
+	eprintclass,
+	eprinttype,
+	issn,
+	issue,
+	issuetitle,
+	issuesubtitle,
+	journalsubtitle,
+	journaltitle,
+	language,
+	note,
+	number,
+	origlanguage,
+	pages,
+	pubstate,
+	series,
+	subtitle,
+	title,
+	titleaddon,
+	translator,
+	version,
+	volume,
+}
 \DeclareDatamodelConstraints[abstract]{
 	\constraint[type=mandatory]{
 		\constraintfieldsxor{

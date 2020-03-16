@@ -359,13 +359,8 @@
 				\setunit{\addspace}%
 			}{}%
 			\ifnameundef{presenter}{}{%
-				\iffieldequalstr{presenterdeleted}{1}{%
-					\bibstring{presentedwith}\addspace%
-					\printnames{presenter}%
-				}{%
-					\bibstring{presentedby}\addspace%
-					\printnames{presenter}%
-				}%
+				\bibstring{presented}\addspace%
+				\printnames{presenter}%
 			}%
 		}%
 	}{}%
