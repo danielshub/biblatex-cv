@@ -1,3 +1,5 @@
+Version: 0.01
+
 # Overview
 
 This LaTeX package provides an interface for creating an academic curriculum vitae (CV) from a BibTeX .bib file. The package makes use of biblatex/biber to automatically format, group, and sort the entries on a CV. Package documentation and an example CV are provided in the doc folder.
